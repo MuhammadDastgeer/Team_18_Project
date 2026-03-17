@@ -1,0 +1,681 @@
+{
+  "name": "signup",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n   \"success\": false,\n   \"message\": \"Internal Server Error\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "2c400ac8-2b93-4620-8bbb-30cf34afc109",
+      "name": "Error Registration Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1968,
+        624
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "jsCode": "const { email, username, password } = $input.item.json;\n   \n   if (!email || !username || !password) {\n     throw new Error('Email, username, and password are required');\n   }\n   \n   if (password.length < 8) {\n     throw new Error('Password must be at least 8 characters');\n   }\n   \n   return {\n     json: {\n       email: email.toLowerCase().trim(),\n       username: username.trim(),\n       password: password\n     }\n   };"
+      },
+      "id": "d34b7992-ec0f-4327-b00f-13a5709e553c",
+      "name": "Validate Registration Request",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -656,
+        256
+      ],
+      "typeVersion": 2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n    \"success\": true,\n    \"message\": \"User registered successfully\",\n    \"user\": {\n        \"id\": \"{{ $json.id }}\",\n        \"email\": \"{{ $json.email }}\",\n        \"username\": \"{{ $json.username }}\"\n    }\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "2286778a-fce9-4cf6-b52d-aeff6c2d07b3",
+      "name": "Registration Successful",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1968,
+        256
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a3b6e7b7-b2e7-42fb-8832-b62f1e53dca7",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.body.email }}"
+            },
+            {
+              "id": "c388e803-f70b-44e2-b7dc-c272669fa261",
+              "name": "username",
+              "type": "string",
+              "value": "={{ $json.body.username }}"
+            },
+            {
+              "id": "12504a6d-e779-4768-9572-d4a9d02a522e",
+              "name": "password",
+              "type": "string",
+              "value": "={{ $json.body.password }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2ad7e0e1-9ab1-4b25-a192-1f8821052010",
+      "name": "Parse Register Request",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -944,
+        512
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "36861ab1-365a-4a88-b50c-9949932f6d01",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Get User By Username').item.json }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9aacf5a3-7cad-4e62-84fa-639a1218acf6",
+      "name": "If Username Is Available",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -256,
+        224
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Name",
+              "keyValue": "={{ $json.username }}"
+            }
+          ]
+        }
+      },
+      "id": "d588d678-dba4-4fab-947e-64d51d57ceef",
+      "name": "Get User By Username",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -448,
+        240
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"That username is taken. Try a different one!\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "0dd3cc19-096e-49e1-8ccf-873650b879af",
+      "name": "Username Taken Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"{{ $json.error }}\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "c70f2169-5442-411d-958a-af52cf735fd6",
+      "name": "Registration Request Invalid Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        -672,
+        528
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "36861ab1-365a-4a88-b50c-9949932f6d01",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Get User By Email').item.json }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "12972170-6555-49b8-88cf-067b77affa2b",
+      "name": "If Email Is Available",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        256,
+        416
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        }
+      },
+      "id": "1089ccbc-4868-4a53-a827-9e134671c821",
+      "name": "Get User By Email",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -48,
+        416
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"That email is already registered. Try a different one!\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "24f04578-41c7-4c0d-a98e-a4c1497557e8",
+      "name": "Email Taken Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        480,
+        176
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "signup",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a3aab19b-33bb-45bd-a13e-8a268044e72b",
+      "name": "Registration Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -928,
+        256
+      ],
+      "webhookId": "8e3d56c5-db22-44aa-8262-7a1f84fd0641",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "type": "SHA512",
+        "value": "={{ $json.password }}",
+        "dataPropertyName": "password"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        560,
+        432
+      ],
+      "id": "dd01884c-a363-41c2-9c2e-c66fa0c011a5",
+      "name": "Crypto"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Verify your account",
+        "message": "=Hi {{ $json.Name }} Your verification code is: {{ $json.verification_code }} Please enter this code to verify your account.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1584,
+        432
+      ],
+      "id": "a58bf5da-abae-4198-988d-30a85935413a",
+      "name": "Send Verification Email",
+      "webhookId": "ba015d57-588b-473b-a036-7da11d05a2fb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uNsayWzYmEaCvqqh",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "action": "generate",
+        "dataPropertyName": "Code",
+        "encodingType": "hex",
+        "stringLength": 6
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        432
+      ],
+      "id": "859963b2-4d7f-4905-b210-92b6d13c485d",
+      "name": "Crypto1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "verification_code": "={{ $json.Code }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Password",
+              "displayName": "Password",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "verification_code",
+              "displayName": "verification_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        432
+      ],
+      "id": "afc34b36-1cb1-417d-8d78-f7581cd3472b",
+      "name": "updata save data"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.username }}",
+            "Email": "={{ $json.email }}",
+            "Password": "={{ $json.password }}",
+            "Status": "unverified"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Password",
+              "displayName": "Password",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "verification_code",
+              "displayName": "verification_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        800,
+        432
+      ],
+      "id": "2538ae64-e138-4261-8324-c1fef4c93313",
+      "name": "save User"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Validate Registration Request": {
+      "main": [
+        [
+          {
+            "node": "Get User By Username",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registration Request Invalid Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Register Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Registration Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Username Is Available": {
+      "main": [
+        [
+          {
+            "node": "Username Taken Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get User By Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User By Username": {
+      "main": [
+        [
+          {
+            "node": "If Username Is Available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Email Is Available": {
+      "main": [
+        [
+          {
+            "node": "Email Taken Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User By Email": {
+      "main": [
+        [
+          {
+            "node": "If Email Is Available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registration Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Register Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto1": {
+      "main": [
+        [
+          {
+            "node": "updata save data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updata save data": {
+      "main": [
+        [
+          {
+            "node": "Send Verification Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "save User": {
+      "main": [
+        [
+          {
+            "node": "Crypto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "save User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Verification Email": {
+      "main": [
+        [
+          {
+            "node": "Registration Successful",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Error Registration Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6222fdca-5bf1-40e4-af97-8acff2dbf3ec",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db686edd45a25c64c818dc201c78f72f0f51c67f96b18f78efe763db4bf7ccdc"
+  },
+  "id": "uSKG6MvGTyDWrXOZ",
+  "tags": []
+}

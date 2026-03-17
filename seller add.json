@@ -1,0 +1,304 @@
+{
+  "name": "seller add",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "add_seller",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -304,
+        -176
+      ],
+      "id": "c6d23450-db74-4eb2-926b-9bbe5d787447",
+      "name": "Webhook",
+      "webhookId": "a1914404-96e7-46db-8f49-66bb74a6b895"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        256,
+        -32
+      ],
+      "id": "c3e0f7b7-c74a-4866-b992-f19e60c89f43",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "7H5ppMlm9jNFxy26",
+          "mode": "list",
+          "cachedResultName": "Seller",
+          "cachedResultUrl": "/projects/mqU4LqYq9W7gBDaE/datatables/7H5ppMlm9jNFxy26"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.body.name }}",
+            "Email": "={{ $json.body.email }}",
+            "Phone_Number": "={{ $json.body.phoneNumber }}",
+            "Location_": "={{ $json.body.location }}",
+            "Price_Range": "={{ $json.body.priceRange }}",
+            "Area": "={{ $json.body.area }}",
+            "Construction_Status": "={{ $json.body.constructionStatus }}",
+            "Property_Type": "={{ $json.body.propertyType }}",
+            "Status": "New"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone_Number",
+              "displayName": "Phone_Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Location_",
+              "displayName": "Location_",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Price_Range",
+              "displayName": "Price_Range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Area",
+              "displayName": "Area",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property_Type",
+              "displayName": "Property_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Construction_Status",
+              "displayName": "Construction_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        -176
+      ],
+      "id": "fabd47b0-a6ae-4451-8d62-5dbb17968baf",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "get_seller",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        144
+      ],
+      "id": "6d9572f6-b0da-4ecb-bbb7-280991f5ed83",
+      "name": "Webhook1",
+      "webhookId": "eed18d37-25f6-458a-a93f-e26267090166"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "7H5ppMlm9jNFxy26",
+          "mode": "list",
+          "cachedResultName": "Seller",
+          "cachedResultUrl": "/projects/mqU4LqYq9W7gBDaE/datatables/7H5ppMlm9jNFxy26"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        144
+      ],
+      "id": "5866efb9-7c4f-4545-b311-3ce46430cb97",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        272,
+        144
+      ],
+      "id": "d618fdcb-8a48-4d18-a858-57bbb742abd5",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Client Details Submission",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},  \nI hope you are doing well.  I am sharing the client details with you. Please find the information below:  \n\nName: {{ $json.Name }}  \nEmail: {{ $json.Email }} \nPhone Number:  {{ $json.Phone_Number }}\nPrice Range:  {{ $json.Price_Range }}\nArea:  {{ $json.Area }}\nLocation:  {{ $json.Location_ }}\n\nKindly review the details and let me know if you need any further information.  \nThank you. ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -256
+      ],
+      "id": "691ce67c-ae3a-40eb-8560-32bac8b09b8f",
+      "name": "Send a message",
+      "webhookId": "66b6c8c6-31b1-4ac7-b557-506a58d02ad2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "AK7nPvft9ApLj20b",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b82a68fe-80ee-45b4-8d40-05a91a5d77cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0889e033444a60e137db604999a7b2505dc484413c1cb55a30a6e0bddde1c970"
+  },
+  "id": "ZrIEvunGr99EGe1v",
+  "tags": []
+}

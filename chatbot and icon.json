@@ -1,0 +1,272 @@
+{
+  "name": "chatbot and icon",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -256,
+        96
+      ],
+      "id": "4ea1d7c5-98ad-44c4-83ec-3a7d02b89db2",
+      "name": "When chat message received",
+      "webhookId": "bbcdcb38-560e-4b17-a7e8-fb8fa101635f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.prompt }}  {{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a Real Estate Data Assistant.\nYour job is to always check the provided property sheet before answering any question.\n\n🔹 Core Instructions:\n\nIf user provides Expected Price\n\nExtract: Price\n\nCheck the sheet\n\nReturn:\n\nLocation (City, Area, Society)\n\nProperty Area (e.g., 5 Marla, 10 Marla, 1 Kanal etc.)\n\nAny other relevant details available in sheet\n\nIf user provides Location (City, Area, Society) OR Property Area\n\nExtract: Location and/or Area\n\nCheck the sheet\n\nReturn:\n\nExpected Price\n\nMatching property details\n\nIf user provides both Price and Location/Area\n\nVerify from sheet\n\nConfirm whether it matches\n\nIf not matching, suggest closest available option from sheet\n\nIf user asks any other related question\n\nAlways check sheet first\n\nThen respond based only on sheet data\n\nDo NOT guess\n\nDo NOT create fake data\n\nIf user requests property based on:\n\nLocation (City, Area, Society)\n\nProperty Area\n\nExpected Price range\n→ Always filter sheet and return best matching options\n\nIf no data found in sheet:\n\nPolitely inform user:\n\"Sheet me is criteria ka koi record available nahi hai.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "583d152a-c7d2-4925-b059-6f1ae789b320",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        272
+      ],
+      "id": "399c7b3a-7999-4e5f-aa32-d198eb149b99",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "5AvyIiSASzkVib1D",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.prompt }}   {{ $json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        288
+      ],
+      "id": "ff485f8b-56d0-4ce3-bb22-f55d8697d1eb",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        -128
+      ],
+      "id": "60813d2b-e1ce-4a30-a008-337297e31bae",
+      "name": "Webhook",
+      "webhookId": "057433eb-a183-4452-842f-603c4541805f"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "0eee98f5-dc88-44b2-aafc-a7bf8433b3fb",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "iGDAh32GOb1cG4ZO",
+          "mode": "list",
+          "cachedResultName": "Property",
+          "cachedResultUrl": "/projects/mqU4LqYq9W7gBDaE/datatables/iGDAh32GOb1cG4ZO"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "orderBy": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_By', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        288
+      ],
+      "id": "7d3a97ed-099a-44d7-89af-1c3ff3ef9b5f",
+      "name": "Get"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "7H5ppMlm9jNFxy26",
+          "mode": "list",
+          "cachedResultName": "Seller",
+          "cachedResultUrl": "/projects/mqU4LqYq9W7gBDaE/datatables/7H5ppMlm9jNFxy26"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "orderBy": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_By', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        288
+      ],
+      "id": "57c48664-c7f6-4d3d-98ed-1eeb0cb71089",
+      "name": "seller"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "iGDAh32GOb1cG4ZO",
+          "mode": "list",
+          "cachedResultName": "Property",
+          "cachedResultUrl": "/projects/mqU4LqYq9W7gBDaE/datatables/iGDAh32GOb1cG4ZO"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "orderBy": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_By', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        288
+      ],
+      "id": "5e0153db-2e55-4961-a6f6-61812a661e53",
+      "name": "buyer"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "seller": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buyer": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c74d6abc-9b1e-4d4f-aad8-9421bdbd2670",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0889e033444a60e137db604999a7b2505dc484413c1cb55a30a6e0bddde1c970"
+  },
+  "id": "ttz5HaEYGMYZC8Hn",
+  "tags": []
+}

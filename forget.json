@@ -1,0 +1,588 @@
+{
+  "name": "forget",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "forgot-password",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "226ce831-9134-49e2-abe6-d143649537d7",
+      "name": "Forgot Password Webhook",
+      "webhookId": "13add528-a305-4441-8527-d4f283a30739"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.body.email }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5a0e27ed-8872-4659-bfd2-c8b3f519e847",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "action": "generate",
+        "dataPropertyName": "new code",
+        "encodingType": "hex",
+        "stringLength": 6
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ad507dd4-99fb-4ff3-a862-e8cf491f4bb3",
+      "name": "Crypto"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Password": "={{ $json.Password }}",
+            "Status": "={{ $json.Status }}",
+            "verification_code": "={{ $json['new code'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Password",
+              "displayName": "Password",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "verification_code",
+              "displayName": "verification_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "e6689950-1a00-42fe-81d9-4d085f21f56f",
+      "name": "Update Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Password Reset Code",
+        "message": "=Hi, your password reset code is: {{ $json.verification_code }}. Use this code to reset your password.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "41eafdec-bade-4a0f-896b-6d86426887fd",
+      "name": "Send Reset Email",
+      "webhookId": "8702f0ea-1527-4bf3-b745-8dc1c487d303",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uNsayWzYmEaCvqqh",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"A password reset code has been sent to your email.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "056fd4df-cf0f-44ea-8199-cd366cf2602d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-reset-code",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        288
+      ],
+      "id": "1f89f0d2-5485-4213-8a27-8dc54f750fcd",
+      "name": "verify-reset-code",
+      "webhookId": "37afd3c0-e610-4101-822a-1f7768efef6d"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.body.email }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        192,
+        288
+      ],
+      "id": "1454fd2b-24d3-4e92-8cd7-e23117c989f2",
+      "name": "find user"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e1831707-ad47-4435-91df-c9098a7af448",
+              "leftValue": "={{ $json.verification_code }}",
+              "rightValue": "={{ $('verify-reset-code').item.json.body.code }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        288
+      ],
+      "id": "e49bae93-9576-4dfb-98c9-86b957887f41",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"failed\",\n  \"message\": \"Invalid or expired reset code.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        608,
+        384
+      ],
+      "id": "a2d68df9-07df-4e9a-9e11-77c32f04cca3",
+      "name": "fail"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Code verified successfully.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        608,
+        176
+      ],
+      "id": "1c10bfae-d579-4437-9a99-707bb9d43ae1",
+      "name": "pass"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reset-password",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        848,
+        272
+      ],
+      "id": "4d459cf9-6cb9-4add-978e-6544fa50984c",
+      "name": "Webhook",
+      "webhookId": "94e7a30a-8755-44d9-ae67-9ea8dc6ad01a"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.body.email }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Password": "={{ $json['reset password'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Password",
+              "displayName": "Password",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "verification_code",
+              "displayName": "verification_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        272
+      ],
+      "id": "bc00e03f-9a49-44ef-a9df-48c44b6f2896",
+      "name": "Update row(s)"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Your password has been reset successfully.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1456,
+        272
+      ],
+      "id": "e7af4b1a-5dde-4839-aa7f-e9bd550c0d79",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "type": "SHA512",
+        "value": "={{ $json.body.new_password }}",
+        "dataPropertyName": "reset password"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        272
+      ],
+      "id": "ca9b7010-03b7-4c78-8868-5905760e7f6e",
+      "name": "reset password"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Forgot Password Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "Update Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Code": {
+      "main": [
+        [
+          {
+            "node": "Send Reset Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reset Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verify-reset-code": {
+      "main": [
+        [
+          {
+            "node": "find user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find user": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "pass",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "reset password",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reset password": {
+      "main": [
+        [
+          {
+            "node": "Update row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f562801a-676a-4e9d-8fa1-eedfc79a66de",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "db686edd45a25c64c818dc201c78f72f0f51c67f96b18f78efe763db4bf7ccdc"
+  },
+  "id": "o8IYJ4jnB4PcQN2k",
+  "tags": []
+}

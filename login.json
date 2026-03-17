@@ -1,0 +1,408 @@
+{
+  "name": "login",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0e50cdb0-f300-4d82-a81c-054dffbc9cfb",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.body.email }}"
+            },
+            {
+              "id": "e5fffb05-c66c-4e35-811b-8718ea43645b",
+              "name": "password",
+              "type": "string",
+              "value": "={{ $json.body.password}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "79540025-e0f5-4653-adad-996836ba6ae5",
+      "name": "Process login webhook",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1248,
+        432
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "id": "407dc8f5-f1e8-402c-b288-3c89ee7bd72a",
+      "name": "Get User",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -1040,
+        432
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "36861ab1-365a-4a88-b50c-9949932f6d01",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "271488b0-d9ee-4e32-ab55-1bfb3a6a8713",
+      "name": "If User Exists",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -720,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n   \"success\": false,\n   \"message\": \"User Not Found\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "01e3b0ef-c7f4-4ce7-a310-c02714b64c48",
+      "name": "User Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        -448,
+        624
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "login",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1e608f4b-05ad-406d-abc3-52ebd5af50d5",
+      "name": "Login Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -1440,
+        432
+      ],
+      "webhookId": "8e3d56c5-db22-44aa-8262-7a1f84fd0641",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "604787bf-f656-42fb-94c3-016f8b0de3b4",
+              "leftValue": "={{ $json.Password }}",
+              "rightValue": "={{ $json['new password'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        416
+      ],
+      "id": "7ffd3581-0381-4fc2-858f-fec6e1a0e7d6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"message\": \"Login successful!\",\n  \"user\": {\n    \"username\": \"{{ $json.username }}\",\n    \"email\": \"{{ $json.email }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        160
+      ],
+      "id": "81ad5f9d-b0b6-4198-b3ca-5d50ded1b409",
+      "name": "sucess"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"failed\",\n  \"message\": \"Invalid password!\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        560
+      ],
+      "id": "884499c7-fea2-4c82-ad1b-1b38c4601ad8",
+      "name": "fail"
+    },
+    {
+      "parameters": {
+        "type": "SHA512",
+        "value": "={{ $('Login Webhook').item.json.body.password }}",
+        "dataPropertyName": "new password"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "7ddffd90-e74e-4429-80c8-173beb6f8125",
+      "name": "Crypto1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.Email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        384
+      ],
+      "id": "4f6370a7-c2cf-4669-8652-a0ac89e1d2b1",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"failed\",\n  \"message\": \"Please verified\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        64,
+        528
+      ],
+      "id": "d45705d9-6663-4ef7-968e-6ed7bc44c208",
+      "name": "fail1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4dc72dcd-d587-422a-a2d0-947813167f36",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "verified",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        384
+      ],
+      "id": "8069deda-550f-4c2c-a142-61b1e069ca25",
+      "name": "verified check"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Process login webhook": {
+      "main": [
+        [
+          {
+            "node": "Get User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User": {
+      "main": [
+        [
+          {
+            "node": "If User Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If User Exists": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "User Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process login webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "sucess",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "verified check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verified check": {
+      "main": [
+        [
+          {
+            "node": "Crypto1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "864e5062-c45b-4e7b-a64c-91af180929f5",
+  "meta": {
+    "instanceId": "db686edd45a25c64c818dc201c78f72f0f51c67f96b18f78efe763db4bf7ccdc"
+  },
+  "id": "tYUgJ4wN50syJKtj",
+  "tags": []
+}

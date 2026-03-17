@@ -1,0 +1,267 @@
+{
+  "name": "email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-email",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        112
+      ],
+      "id": "74b61f8e-1071-4da4-b5ec-117c4ac6dfd3",
+      "name": "Verify Email Webhook",
+      "webhookId": "9cbf44f1-5c4c-4fe3-adb9-215e607cbbf2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.body.email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        112
+      ],
+      "id": "99898d44-ec17-40f6-bf5f-98ff5af6ce52",
+      "name": "get data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f8c094f4-b111-49ff-9819-ca90ff374b30",
+              "leftValue": "={{ $('Verify Email Webhook').item.json.body.code }}",
+              "rightValue": "={{ $json.verification_code }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        112
+      ],
+      "id": "49ad71f8-750d-436e-b566-a2865ab015ba",
+      "name": "check code"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ymzPfm4p2rstCWEn",
+          "mode": "list",
+          "cachedResultName": "User",
+          "cachedResultUrl": "/projects/58xDkyt04Kme0c6C/datatables/ymzPfm4p2rstCWEn"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Email",
+              "keyValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "verified"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Password",
+              "displayName": "Password",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "verification_code",
+              "displayName": "verification_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fc1cf531-a5fb-45c1-a089-84c72c3748eb",
+      "name": "updata status"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"verified\",\n  \"message\": \"Your email has been successfully verified.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        0
+      ],
+      "id": "f859189c-0009-43ff-8a58-72effe68b74f",
+      "name": "success message"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"failed\",\n  \"message\": \"Invalid or expired verification code.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        224
+      ],
+      "id": "356ce5d4-73dd-481f-be05-c6884b32c364",
+      "name": "faild message"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Verify Email Webhook": {
+      "main": [
+        [
+          {
+            "node": "get data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get data": {
+      "main": [
+        [
+          {
+            "node": "check code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check code": {
+      "main": [
+        [
+          {
+            "node": "updata status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "faild message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updata status": {
+      "main": [
+        [
+          {
+            "node": "success message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f4df986e-d236-4f3a-81dc-ef710c8238b8",
+  "meta": {
+    "instanceId": "db686edd45a25c64c818dc201c78f72f0f51c67f96b18f78efe763db4bf7ccdc"
+  },
+  "id": "DozytdmZpxj8nLr8",
+  "tags": []
+}
